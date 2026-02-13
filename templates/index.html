@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Security Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-shield-halved"></i>
+                <span>SecureNet Analyzer</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-item active">
+                    <i class="fas fa-bolt"></i>
+                    Quick Scan
+                </a>
+                <a href="/dashboard" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    Enterprise Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <div class="content-container">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>Network Security Analysis</h1>
+                    <p class="hero-subtitle">Instant Wi-Fi risk assessment powered by machine learning</p>
+                </div>
+            </div>
+
+            <!-- Quick Scan Card -->
+            <div class="scan-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-radar"></i> Automated Scan</h2>
+                    <p>One-click network security assessment</p>
+                </div>
+                <div class="card-body">
+                    <button id="scanBtn" onclick="scanWifi()" class="btn-primary">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Run Security Scan</span>
+                    </button>
+                    <p id="scanStatus" class="status-text"></p>
+                </div>
+            </div>
+
+            <!-- Results Display -->
+            <div id="scanResult" class="result-card" style="display: none;"></div>
+
+            <!-- Manual Entry Section -->
+            <div class="manual-section">
+                <button class="toggle-manual" onclick="toggleManual()">
+                    <i class="fas fa-keyboard"></i>
+                    Advanced: Manual Entry
+                </button>
+
+                <form id="manualForm" method="POST" action="/ui-predict" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="encryption">
+                                <i class="fas fa-lock"></i>
+                                Encryption Type
+                            </label>
+                            <select name="encryption" id="encryption">
+                                <option value="0">Open (No Encryption)</option>
+                                <option value="1">WPA2 (Standard)</option>
+                                <option value="2">WPA3 (Secure)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signal_strength">
+                                <i class="fas fa-signal"></i>
+                                Signal Strength (dBm)
+                            </label>
+                            <input type="number" name="signal_strength" id="signal_strength" placeholder="-50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="channel">
+                                <i class="fas fa-broadcast-tower"></i>
+                                Channel
+                            </label>
+                            <input type="number" name="channel" id="channel" placeholder="6" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ssid_similarity">
+                                <i class="fas fa-fingerprint"></i>
+                                SSID Similarity Score
+                            </label>
+                            <input type="number" name="ssid_similarity" id="ssid_similarity" placeholder="0 - 100"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="packet_anomaly">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Packet Anomaly Detected?
+                            </label>
+                            <select name="packet_anomaly" id="packet_anomaly">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-chart-bar"></i>
+                        Analyze Risk
+                    </button>
+                </form>
+            </div>
+
+            <!-- Manual Result -->
+            {% if result %}
+            <div
+                class="result-card {% if 'SAFE' in result %}safe{% elif 'MEDIUM' in result %}medium{% else %}dangerous{% endif %}">
+                <div class="result-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Analysis Result</span>
+                </div>
+                <div class="result-body">
+                    {{ result }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function toggleManual() {
+            var form = document.getElementById("manualForm");
+            if (form.style.display === "none") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        }
+
+        function scanWifi() {
+            var btn = document.getElementById("scanBtn");
+            var status = document.getElementById("scanStatus");
+            var resultBox = document.getElementById("scanResult");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Scanning...</span>';
+            status.innerHTML = "Analyzing network security...";
+            resultBox.style.display = "none";
+
+            fetch('/scan_and_predict', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    var risk = data.result;
+                    var wifi = data.wifi_data;
+
+                    var riskClass = "";
+                    var riskIcon = "";
+                    if (risk.includes("SAFE")) {
+                        riskClass = "safe";
+                        riskIcon = "fa-check-circle";
+                    } else if (risk.includes("MEDIUM")) {
+                        riskClass = "medium";
+                        riskIcon = "fa-exclamation-circle";
+                    } else {
+                        riskClass = "dangerous";
+                        riskIcon = "fa-times-circle";
+                    }
+
+                    resultBox.className = "result-card " + riskClass;
+                    resultBox.innerHTML = `
+                        <div class="result-header">
+                            <i class="fas ${riskIcon}"></i>
+                            <span>${risk}</span>
+                        </div>
+                        <div class="result-body">
+                            <div class="result-detail">
+                                <span class="label">Network:</span>
+                                <span class="value">${wifi.ssid}</span>
+                            </div>
+                            <div class="result-detail">
+                                <span class="label">Signal Strength:</span>
+                                <span class="value">${wifi.signal_strength} dBm</span>
+                            </div>
+                            <div class="result-detail">
+                                <span class="label">Channel:</span>
+                                <span class="value">${wifi.channel}</span>
+                            </div>
+                            <div class="result-detail">
+                                <span class="label">Encryption:</span>
+                                <span class="value">${wifi.encryption == 0 ? 'Open' : (wifi.encryption == 1 ? 'WPA2' : 'WPA3')}</span>
+                            </div>
+                        </div>
+                    `;
+                    resultBox.style.display = "block";
+
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play-circle"></i><span>Run Security Scan</span>';
+                    status.innerHTML = "";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    status.innerHTML = "Scan failed. Please use manual mode.";
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play-circle"></i><span>Run Security Scan</span>';
+                });
+        }
+    </script>
+</body>
+
+</html>

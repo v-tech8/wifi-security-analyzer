@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Security Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-shield-halved"></i>
+                <span>SecureNet Analyzer</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-item">
+                    <i class="fas fa-bolt"></i>
+                    Quick Scan
+                </a>
+                <a href="/dashboard" class="nav-item active">
+                    <i class="fas fa-chart-line"></i>
+                    Enterprise Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-wrapper">
+        <div class="dashboard-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Security Operations Center</h1>
+                    <p>Comprehensive network security monitoring and compliance management</p>
+                </div>
+                <button id="runScanBtn" class="btn-scan">
+                    <i class="fas fa-play-circle"></i>
+                    <span>Run Comprehensive Scan</span>
+                </button>
+            </div>
+
+            <!-- Results Panel -->
+            <div id="resultsPanel" class="results-section" style="display: none;">
+                <!-- Risk Overview -->
+                <div class="overview-grid">
+                    <div class="risk-card">
+                        <div class="risk-header">
+                            <span>Overall Risk Score</span>
+                            <span id="scanTimestamp" class="timestamp"></span>
+                        </div>
+                        <div class="risk-display" id="riskBadge">
+                            <div class="risk-score" id="riskScore">--</div>
+                            <div class="risk-label" id="riskLabel">Analyzing...</div>
+                        </div>
+                    </div>
+
+                    <div class="network-card">
+                        <h3><i class="fas fa-network-wired"></i> Network Information</h3>
+                        <div id="networkDetails" class="network-details"></div>
+                    </div>
+                </div>
+
+                <!-- Security Metrics -->
+                <div class="metrics-section">
+                    <h2><i class="fas fa-chart-bar"></i> Security Metrics</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-lock"></i>
+                                <span>Encryption</span>
+                            </div>
+                            <div class="metric-value" id="encryptionScore">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="encryptionBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-signal"></i>
+                                <span>Signal Quality</span>
+                            </div>
+                            <div class="metric-value" id="signalScore">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="signalBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-shield-virus"></i>
+                                <span>Vulnerability</span>
+                            </div>
+                            <div class="metric-value" id="vulnScore">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="vulnBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>Compliance</span>
+                            </div>
+                            <div class="metric-value" id="complianceScore">--</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" id="complianceBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="analysis-grid">
+                    <!-- Vulnerabilities -->
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bug"></i> Vulnerabilities</h3>
+                        </div>
+                        <div id="vulnerabilitiesList" class="card-content"></div>
+                    </div>
+
+                    <!-- Threats -->
+                    <div class="analysis-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-triangle-exclamation"></i> Threat Indicators</h3>
+                        </div>
+                        <div id="threatsList" class="card-content"></div>
+                    </div>
+                </div>
+
+                <!-- Compliance -->
+                <div class="compliance-section">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list-check"></i> Compliance Status</h3>
+                    </div>
+                    <div id="complianceList" class="compliance-content"></div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-section">
+                    <div class="card-header">
+                        <h3><i class="fas fa-lightbulb"></i> Security Recommendations</h3>
+                    </div>
+                    <div id="recommendationsList" class="recommendations-content"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-bar">
+                    <button id="generateReportBtn" class="btn-action btn-primary">
+                        <i class="fas fa-file-pdf"></i>
+                        Generate PDF Report
+                    </button>
+                    <button id="newScanBtn" class="btn-action btn-secondary">
+                        <i class="fas fa-rotate"></i>
+                        New Scan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Scans -->
+            <div class="history-section">
+                <div class="card-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Scan History</h3>
+                </div>
+                <div class="history-content">
+                    {% if recent_scans %}
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Timestamp</th>
+                                <th><i class="fas fa-wifi"></i> Network</th>
+                                <th><i class="fas fa-exclamation-circle"></i> Risk Level</th>
+                                <th><i class="fas fa-chart-simple"></i> Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for scan in recent_scans %}
+                            <tr>
+                                <td>{{ scan.timestamp }}</td>
+                                <td>{{ scan.ssid }}</td>
+                                <td><span class="badge badge-{{ scan.risk_level.lower() }}">{{ scan.risk_level }}</span>
+                                </td>
+                                <td>{{ "%.1f"|format(scan.overall_risk_score) }}/100</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No scan history available. Run your first comprehensive scan above.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Analyzing network security...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+
+</html>

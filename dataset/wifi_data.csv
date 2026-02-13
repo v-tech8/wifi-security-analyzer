@@ -1,0 +1,8 @@
+encryption,signal_strength,channel,ssid_similarity,packet_anomaly,label
+0,-40,6,90,1,2
+1,-55,11,20,0,0
+0,-70,1,85,1,2
+1,-60,6,30,0,1
+2,-50,6,10,0,0
+
+
