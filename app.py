@@ -18,11 +18,13 @@ import scan_wifi
 from security_analyzer import SecurityAnalyzer
 from report_generator import ReportGenerator
 from database import Database
+from ai_advisor import AIAdvisor
 
 # Initialize enterprise components
 security_analyzer = SecurityAnalyzer()
 report_generator = ReportGenerator()
 db = Database()
+ai_advisor = AIAdvisor()
 
 risk_map = {
     0: "SAFE 🟢",
@@ -293,6 +295,25 @@ def get_trends():
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/ai/suggestions", methods=["POST"])
+@permission_required
+def ai_suggestions():
+    """
+    AI-powered security suggestions using Google Gemini.
+    Accepts scan result JSON and returns smart recommendations.
+    """
+    try:
+        scan_data = request.json
+        if not scan_data:
+            return jsonify({"success": False, "error": "No scan data provided"}), 400
+
+        result = ai_advisor.get_ai_suggestions(scan_data)
+        return jsonify({"success": True, **result})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 @app.route("/ui-predict", methods=["POST"])
 @permission_required

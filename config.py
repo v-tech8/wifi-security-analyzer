@@ -3,6 +3,13 @@ Configuration settings for Enterprise Wi-Fi Security Analysis System
 """
 from datetime import datetime
 
+# ── AI Configuration ──────────────────────────────────────────────────────────
+# Get your FREE Gemini API key at: https://aistudio.google.com
+GEMINI_API_KEY = ""   # <-- paste your Gemini API key here
+
+# App secret key for session management
+SECRET_KEY = "wifi-security-analyzer-secret-2024"
+
 # Company Branding
 COMPANY_NAME = "SecureNet Analytics"
 COMPANY_LOGO = None  # Path to logo image if available

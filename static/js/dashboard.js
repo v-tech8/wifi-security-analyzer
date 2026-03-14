@@ -1,6 +1,7 @@
 // Enterprise Dashboard JavaScript
 
 let currentScanId = null;
+let currentScanData = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     // Event listeners
@@ -45,6 +46,9 @@ async function runComprehensiveScan() {
 }
 
 function displayResults(data) {
+    // Store scan data for AI advisor
+    currentScanData = data;
+
     // Show results panel
     document.getElementById('resultsPanel').style.display = 'block';
 
@@ -299,8 +303,127 @@ async function generatePDFReport() {
 function resetDashboard() {
     document.getElementById('resultsPanel').style.display = 'none';
     currentScanId = null;
+    currentScanData = null;
+
+    // Reset AI section
+    document.getElementById('aiThinking').style.display = 'none';
+    document.getElementById('aiResults').style.display = 'none';
+    document.getElementById('aiSuggestionsList').innerHTML = '';
+    document.getElementById('aiSummary').textContent = '';
+    document.getElementById('aiSourceBadge').textContent = '';
+    document.getElementById('getAIBtn').disabled = false;
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ─── AI Advisor ──────────────────────────────────────────────────────────────
+
+async function getAISuggestions() {
+    if (!currentScanData) {
+        alert('Please run a scan first to get AI suggestions.');
+        return;
+    }
+
+    const btn = document.getElementById('getAIBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Analyzing...</span>';
+
+    document.getElementById('aiThinking').style.display = 'flex';
+    document.getElementById('aiResults').style.display = 'none';
+
+    try {
+        const response = await fetch('/api/ai/suggestions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentScanData)
+        });
+
+        const data = await response.json();
+
+        document.getElementById('aiThinking').style.display = 'none';
+
+        if (data.success) {
+            displayAISuggestions(data);
+        } else {
+            showAIError('Could not fetch AI suggestions: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        document.getElementById('aiThinking').style.display = 'none';
+        showAIError('Connection error: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sparkles"></i> <span>Refresh AI Suggestions</span>';
+    }
+}
+
+function displayAISuggestions(data) {
+    const resultsEl = document.getElementById('aiResults');
+    const summaryEl = document.getElementById('aiSummary');
+    const listEl = document.getElementById('aiSuggestionsList');
+    const badgeEl = document.getElementById('aiSourceBadge');
+
+    // Summary
+    summaryEl.textContent = data.summary || '';
+
+    // Source badge
+    if (data.source === 'gemini') {
+        badgeEl.innerHTML = '<i class="fas fa-robot"></i> Powered by Google Gemini AI';
+        badgeEl.className = 'ai-source-badge gemini';
+    } else {
+        badgeEl.innerHTML = '<i class="fas fa-microchip"></i> Smart Rule-Based Analysis';
+        badgeEl.className = 'ai-source-badge rule-based';
+    }
+
+    // Build suggestion cards first (hidden)
+    listEl.innerHTML = '';
+    (data.suggestions || []).forEach((suggestion, idx) => {
+        const item = document.createElement('div');
+        item.className = 'ai-suggestion-item';
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(12px)';
+        item.innerHTML = `
+            <div class="ai-suggestion-num">${idx + 1}</div>
+            <div class="ai-suggestion-text"></div>
+        `;
+        listEl.appendChild(item);
+    });
+
+    resultsEl.style.display = 'block';
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Animate each card then typewrite text
+    (data.suggestions || []).forEach((suggestion, idx) => {
+        const item = listEl.children[idx];
+        const textEl = item.querySelector('.ai-suggestion-text');
+
+        setTimeout(() => {
+            item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
+            typewrite(textEl, suggestion, 18);
+        }, idx * 180);
+    });
+}
+
+function typewrite(el, text, speed) {
+    let i = 0;
+    el.textContent = '';
+    const timer = setInterval(() => {
+        el.textContent += text[i];
+        i++;
+        if (i >= text.length) clearInterval(timer);
+    }, speed);
+}
+
+function showAIError(msg) {
+    const resultsEl = document.getElementById('aiResults');
+    const listEl = document.getElementById('aiSuggestionsList');
+    document.getElementById('aiSummary').textContent = '';
+    document.getElementById('aiSourceBadge').textContent = '';
+    listEl.innerHTML = `<div class="ai-error"><i class="fas fa-circle-exclamation"></i> ${msg}</div>`;
+    resultsEl.style.display = 'block';
+}
+
 
 function showLoading(show) {
     document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
