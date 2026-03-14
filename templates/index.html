@@ -27,6 +27,10 @@
                     <i class="fas fa-chart-line"></i>
                     Enterprise Dashboard
                 </a>
+                <a href="/logout" class="nav-item" style="color: var(--danger);">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
             </div>
         </div>
     </nav>
@@ -166,6 +170,7 @@
                 .then(data => {
                     var risk = data.result;
                     var wifi = data.wifi_data;
+                    var recs = data.recommendations;
 
                     var riskClass = "";
                     var riskIcon = "";
@@ -202,6 +207,18 @@
                             <div class="result-detail">
                                 <span class="label">Encryption:</span>
                                 <span class="value">${wifi.encryption == 0 ? 'Open' : (wifi.encryption == 1 ? 'WPA2' : 'WPA3')}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-recommendations" style="padding: 0 2rem 2rem 2rem;">
+                            <h3><i class="fas fa-robot"></i> AI Security Suggestions</h3>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                ${recs ? recs.map(r => `
+                                    <div class="rec-item">
+                                        <i class="fas ${r.includes('CRITICAL') || r.includes('Action') ? 'fa-shield-alt' : (r.includes('Warning') || r.includes('Alert') ? 'fa-exclamation-triangle' : 'fa-info-circle')}"></i>
+                                        <span>${r}</span>
+                                    </div>
+                                `).join('') : '<p>No recommendations available.</p>'}
                             </div>
                         </div>
                     `;

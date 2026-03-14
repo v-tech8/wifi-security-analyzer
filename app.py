@@ -3,8 +3,12 @@ import pickle
 import numpy as np
 from datetime import datetime
 import os
+from functools import wraps
+from flask import Flask, request, jsonify, render_template, send_file, session, redirect, url_for, flash
+import config
 
 app = Flask(__name__)
+app.secret_key = config.SECRET_KEY if hasattr(config, 'SECRET_KEY') else os.urandom(24)
 
 # Load trained model
 model = pickle.load(open("model/wifi_risk_model.pkl", "rb"))
@@ -14,7 +18,6 @@ import scan_wifi
 from security_analyzer import SecurityAnalyzer
 from report_generator import ReportGenerator
 from database import Database
-import config
 
 # Initialize enterprise components
 security_analyzer = SecurityAnalyzer()
@@ -27,17 +30,113 @@ risk_map = {
     2: "DANGEROUS 🔴"
 }
 
+# --- Authentication Decorators ---
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def permission_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        if not session.get('permissions_granted'):
+            return redirect(url_for('tutorial'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- Auth Routes ---
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if db.verify_user(username, password):
+            session['user_id'] = username
+            return redirect(url_for('tutorial') if not session.get('permissions_granted') else url_for('home'))
+        else:
+            flash("Invalid username or password.", "error")
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        if db.create_user(username, password):
+            flash("Account created! Please log in.", "success")
+            return redirect(url_for('login'))
+        else:
+            flash("Username already exists.", "error")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route("/tutorial")
+@login_required
+def tutorial():
+    if session.get('permissions_granted'):
+        return redirect(url_for('home'))
+    return render_template("tutorial.html")
+
+@app.route("/grant_permission", methods=["POST"])
+@login_required
+def grant_permission():
+    session['permissions_granted'] = True
+    return redirect(url_for('home'))
+
+# --- Application Routes ---
+
 @app.route("/")
+@permission_required
 def home():
     return render_template("index.html")
 
+def generate_ai_recommendations(wifi_data, prediction):
+    """Simple Expert System acting as an AI to provide security recommendations"""
+    recs = []
+    
+    if int(wifi_data.get('encryption', 0)) == 0:
+        recs.append("CRITICAL: Your network has NO encryption. Configure your router to use WPA2 or WPA3 security immediately.")
+    elif int(wifi_data.get('encryption', 0)) == 1:
+        recs.append("Suggestion: Your network uses standard WPA/WPA2. Upgrade your router settings to WPA3 if supported for better protection.")
+        
+    sig = int(wifi_data.get('signal_strength', 0))
+    if sig < -70:
+        recs.append("Notice: Weak signal strength detected. Consider moving closer to the router or adding a Wi-Fi extender.")
+        
+    if int(wifi_data.get('packet_anomaly', 0)) == 1:
+        recs.append("Alert: Anomalous packet activity detected. Monitor network traffic closely and ensure your firewall is fully enabled.")
+        
+    if int(wifi_data.get('ssid_similarity', 0)) > 80:
+        recs.append("Warning: High SSID similarity score! This could indicate a rogue access point nearby mimicking your network.")
+        
+    if int(prediction) == 2:
+        recs.append("Action Required: Your network is rated DANGEROUS. Change your Wi-Fi password immediately.")
+    elif int(prediction) == 1:
+        recs.append("Action Required: Your network has MEDIUM risk. Ensure router firmware is up to date.")
+        
+    if not recs:
+        recs.append("Great job! Your network appears relatively secure. Always use strong, unique passwords.")
+        
+    return recs
+
 @app.route("/dashboard")
+@permission_required
 def dashboard():
     """Enterprise dashboard view"""
     recent_scans = db.get_recent_scans(limit=5)
     return render_template("dashboard.html", recent_scans=recent_scans)
 
 @app.route("/scan_and_predict", methods=["POST"])
+@permission_required
 def scan_and_predict():
     """Quick scan endpoint (original functionality)"""
     wifi_data = scan_wifi.get_wifi_info()
@@ -53,12 +152,16 @@ def scan_and_predict():
     prediction = model.predict(features)[0]
     result = risk_map[prediction]
     
+    ai_recs = generate_ai_recommendations(wifi_data, prediction)
+    
     return jsonify({
         "wifi_data": wifi_data,
-        "result": result
+        "result": result,
+        "recommendations": ai_recs
     })
 
 @app.route("/api/scan/comprehensive", methods=["POST"])
+@permission_required
 def comprehensive_scan():
     """
     Enterprise-grade comprehensive security analysis
@@ -95,6 +198,7 @@ def comprehensive_scan():
         }), 500
 
 @app.route("/api/reports/generate", methods=["POST"])
+@permission_required
 def generate_report():
     """
     Generate professional PDF report
@@ -163,6 +267,7 @@ def generate_report():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/reports/history", methods=["GET"])
+@permission_required
 def get_report_history():
     """Get historical scan reports"""
     try:
@@ -176,6 +281,7 @@ def get_report_history():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/analytics/trends", methods=["GET"])
+@permission_required
 def get_trends():
     """Get trend analytics data"""
     try:
@@ -189,6 +295,7 @@ def get_trends():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/ui-predict", methods=["POST"])
+@permission_required
 def ui_predict():
     """Original UI prediction endpoint"""
     data = request.form
@@ -205,6 +312,7 @@ def ui_predict():
     return render_template("index.html", result=risk_map[prediction])
 
 @app.route("/predict", methods=["POST"])
+@permission_required
 def api_predict():
     """Original API prediction endpoint"""
     data = request.json

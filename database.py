@@ -3,10 +3,10 @@ Database management for Wi-Fi Security Analysis System
 """
 import sqlite3
 import json
-from datetime import datetime, timedelta
 from typing import List, Optional, Dict
 from contextlib import contextmanager
 import config
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
     """Database manager for scan history and analytics"""
@@ -33,6 +33,16 @@ class Database:
         """Initialize database tables"""
         with self.get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Users table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
             
             # Scans table
             cursor.execute('''
@@ -89,10 +99,41 @@ class Database:
             ''')
             
             # Create indexes
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_scans_timestamp ON scans(timestamp)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_scans_ssid ON scans(ssid)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_vulns_scan ON vulnerabilities(scan_id)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_threats_scan ON threats(scan_id)')
+            
+            # Auto-inject default admin if table is empty
+            cursor.execute('SELECT COUNT(*) as count FROM users')
+            if cursor.fetchone()['count'] == 0:
+                self._insert_user(cursor, "admin", "admin")
+                
+    def _insert_user(self, cursor, username, password):
+        """Helper to insert a user directly into the cursor"""
+        p_hash = generate_password_hash(password)
+        cursor.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, p_hash))
+        
+    def create_user(self, username, password) -> bool:
+        """Create a new user. Returns False if username exists."""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                self._insert_user(cursor, username, password)
+                return True
+        except sqlite3.IntegrityError:
+            return False
+            
+    def verify_user(self, username, password) -> bool:
+        """Verify user credentials."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
+            row = cursor.fetchone()
+            if row:
+                return check_password_hash(row['password_hash'], password)
+            return False
     
     def save_scan(self, scan_result: Dict) -> bool:
         """Save scan result to database"""

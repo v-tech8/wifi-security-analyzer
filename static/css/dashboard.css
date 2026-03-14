@@ -1,120 +1,18 @@
 /* ===================================
-   Enterprise Security Dashboard - Professional Styles
+   Enterprise Dashboard Clean Styles
+   (Matches main style.css design language)
    =================================== */
 
-:root {
-    --primary: #2563eb;
-    --primary-dark: #1e40af;
-    --secondary: #64748b;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --dark: #0f172a;
-    --dark-light: #1e293b;
-    --light: #f8fafc;
-    --border: #e2e8f0;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f1f5f9;
-    color: var(--dark);
-    line-height: 1.6;
-}
-
-/* ===================================
-   Top Navigation
-   =================================== */
-
-.top-nav {
-    background: white;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: var(--shadow);
-}
-
-.nav-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 70px;
-}
-
-.nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--dark);
-}
-
-.nav-brand i {
-    font-size: 1.5rem;
-    color: var(--primary);
-}
-
-.nav-links {
-    display: flex;
-    gap: 8px;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--secondary);
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.nav-item i {
-    font-size: 1rem;
-}
-
-.nav-item:hover {
-    background: var(--light);
-    color: var(--primary);
-}
-
-.nav-item.active {
-    background: var(--primary);
-    color: white;
-}
-
-/* ===================================
-   Dashboard Layout
-   =================================== */
+@import url('../style.css');
 
 .dashboard-wrapper {
-    min-height: calc(100vh - 70px);
     padding: 2rem;
 }
 
 .dashboard-container {
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
 }
-
-/* ===================================
-   Page Header
-   =================================== */
 
 .page-header {
     display: flex;
@@ -123,8 +21,9 @@ body {
     margin-bottom: 2rem;
     padding: 2rem;
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .page-header h1 {
@@ -132,51 +31,42 @@ body {
     font-weight: 700;
     color: var(--dark);
     margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
 }
 
 .page-header p {
-    color: var(--secondary);
-    font-size: 1rem;
+    color: var(--text-muted);
+    font-size: 1.05rem;
 }
 
 .btn-scan {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     padding: 14px 28px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.2);
 }
 
 .btn-scan:hover {
+    background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
 }
 
-.btn-scan:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ===================================
-   Results Section
-   =================================== */
-
+/* Overview Layouts */
 .results-section {
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
 
-/* Overview Grid */
 .overview-grid {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -184,11 +74,17 @@ body {
 }
 
 .risk-card,
-.network-card {
+.network-card,
+.metrics-section,
+.analysis-card,
+.compliance-section,
+.recommendations-section,
+.history-section {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 2rem;
     box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .risk-header {
@@ -197,53 +93,50 @@ body {
     align-items: center;
     margin-bottom: 2rem;
     font-weight: 600;
-    color: var(--dark);
-}
-
-.timestamp {
-    font-size: 0.875rem;
-    color: var(--secondary);
-    font-weight: 400;
+    color: var(--text-muted);
 }
 
 .risk-display {
     text-align: center;
-    padding: 2rem;
+    padding: 1.5rem;
 }
 
 .risk-score {
-    font-size: 4rem;
+    font-size: 4.5rem;
     font-weight: 700;
+    line-height: 1;
     margin-bottom: 0.5rem;
+    letter-spacing: -2px;
 }
 
 .risk-label {
     font-size: 1.25rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-.risk-display.safe .risk-score {
+.risk-display.safe .risk-score,
+.risk-display.safe .risk-label {
     color: var(--success);
 }
 
-.risk-display.medium .risk-score {
+.risk-display.medium .risk-score,
+.risk-display.medium .risk-label {
     color: var(--warning);
 }
 
-.risk-display.dangerous .risk-score {
+.risk-display.dangerous .risk-score,
+.risk-display.dangerous .risk-label {
     color: var(--danger);
 }
 
 .network-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 1.5rem;
 }
 
 .network-card h3 i {
@@ -260,39 +153,31 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 12px;
-    background: var(--light);
+    background: #FAFAFC;
     border-radius: 8px;
+    border: 1px solid var(--border);
 }
 
 .network-detail strong {
-    color: var(--secondary);
+    color: var(--text-muted);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
 .network-detail span {
     color: var(--dark);
     font-weight: 600;
+    font-size: 0.95rem;
 }
 
-/* ===================================
-   Metrics Section
-   =================================== */
-
-.metrics-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: var(--shadow);
-}
-
+/* Metrics */
 .metrics-section h2 {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--dark);
     margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .metrics-section h2 i {
@@ -307,28 +192,22 @@ body {
 
 .metric-card {
     padding: 1.5rem;
-    background: var(--light);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    transition: all 0.3s;
-}
-
-.metric-card:hover {
-    border-color: var(--primary);
-    transform: translateY(-2px);
+    background: #FAFAFC;
+    border-radius: 12px;
+    border: 1px solid var(--border);
 }
 
 .metric-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 1rem;
-    color: var(--secondary);
+    gap: 8px;
+    color: var(--text-muted);
     font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
 }
 
 .metric-header i {
-    font-size: 1.25rem;
     color: var(--primary);
 }
 
@@ -336,294 +215,38 @@ body {
     font-size: 2.5rem;
     font-weight: 700;
     color: var(--dark);
+    line-height: 1;
     margin-bottom: 0.5rem;
 }
 
 .metric-bar {
     height: 6px;
-    background: #e2e8f0;
-    border-radius: 3px;
+    background: var(--border);
+    border-radius: 4px;
     overflow: hidden;
 }
 
 .metric-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-    border-radius: 3px;
-    transition: width 0.5s ease;
-}
-
-/* ===================================
-   Analysis Grid
-   =================================== */
-
-.analysis-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-}
-
-.analysis-card,
-.compliance-section,
-.recommendations-section,
-.history-section {
-    background: white;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.card-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--light);
-}
-
-.card-header h3 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--dark);
-}
-
-.card-header h3 i {
-    color: var(--primary);
-}
-
-.card-content,
-.compliance-content,
-.recommendations-content,
-.history-content {
-    padding: 2rem;
-}
-
-/* Vulnerabilities */
-.vulnerability-item {
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    border-left: 4px solid var(--border);
-    background: var(--light);
-    border-radius: 8px;
-}
-
-.vulnerability-item.critical {
-    border-left-color: var(--danger);
-    background: #fef2f2;
-}
-
-.vulnerability-item.high {
-    border-left-color: #f97316;
-    background: #fff7ed;
-}
-
-.vulnerability-item.medium {
-    border-left-color: var(--warning);
-    background: #fffbeb;
-}
-
-.vulnerability-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.vulnerability-title {
-    font-weight: 600;
-    color: var(--dark);
-    font-size: 1.05rem;
-}
-
-.severity-badge {
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.severity-badge.critical {
-    background: var(--danger);
-    color: white;
-}
-
-.severity-badge.high {
-    background: #f97316;
-    color: white;
-}
-
-.severity-badge.medium {
-    background: var(--warning);
-    color: white;
-}
-
-.vulnerability-details p {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
-    color: var(--secondary);
-}
-
-.vulnerability-details strong {
-    color: var(--dark);
-}
-
-/* Threats */
-.threat-item {
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    background: var(--light);
-    border-radius: 8px;
-}
-
-.threat-header {
-    font-weight: 600;
-    color: var(--dark);
-    margin-bottom: 1rem;
-    text-transform: capitalize;
-}
-
-.confidence-bar {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0.5rem 0 1rem 0;
-}
-
-.confidence-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--warning), #f97316);
+    background: var(--primary);
     border-radius: 4px;
 }
 
-/* Compliance */
-.compliance-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    background: var(--light);
-    border-radius: 8px;
-}
-
-.compliance-status {
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.compliance-status.compliant {
-    background: #ecfdf5;
-    color: var(--success);
-}
-
-.compliance-status.non-compliant {
-    background: #fef2f2;
-    color: var(--danger);
-}
-
-.compliance-status.partial {
-    background: #fffbeb;
-    color: var(--warning);
-}
-
-.compliance-status.not-applicable {
-    background: #f1f5f9;
-    color: var(--secondary);
-}
-
-/* Recommendations */
-.recommendation-item {
-    padding: 1rem 1rem 1rem 2.5rem;
-    margin-bottom: 0.5rem;
-    background: var(--light);
-    border-radius: 8px;
-    position: relative;
-    color: var(--dark);
-}
-
-.recommendation-item::before {
-    content: "•";
-    position: absolute;
-    left: 1rem;
-    color: var(--primary);
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-/* ===================================
-   Action Bar
-   =================================== */
-
-.action-bar {
-    display: flex;
-    gap: 1rem;
-    padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-}
-
-.btn-action {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 24px;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-primary {
-    background: var(--success);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #059669;
-    transform: translateY(-2px);
-}
-
-.btn-secondary {
-    background: var(--light);
-    color: var(--dark);
-    border: 2px solid var(--border);
-}
-
-.btn-secondary:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-/* ===================================
-   History Table
-   =================================== */
-
+/* History Table */
 .history-table {
     width: 100%;
     border-collapse: collapse;
-}
-
-.history-table thead {
-    background: var(--light);
+    margin-top: 1rem;
 }
 
 .history-table th {
-    padding: 1rem;
     text-align: left;
+    padding: 1rem;
+    background: #FAFAFC;
+    color: var(--text-muted);
     font-weight: 600;
-    color: var(--dark);
-    border-bottom: 2px solid var(--border);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
 }
 
 .history-table th i {
@@ -635,6 +258,7 @@ body {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     color: var(--dark);
+    font-size: 0.95rem;
 }
 
 .badge {
@@ -646,51 +270,41 @@ body {
 }
 
 .badge-safe {
-    background: #ecfdf5;
+    background: #E8F8F0;
     color: var(--success);
 }
 
 .badge-medium {
-    background: #fffbeb;
+    background: #FFF6E5;
     color: var(--warning);
 }
 
 .badge-dangerous {
-    background: #fef2f2;
+    background: #FFEBEA;
     color: var(--danger);
 }
 
-/* ===================================
-   Empty State
-   =================================== */
-
 .empty-state {
     text-align: center;
-    padding: 3rem;
-    color: var(--secondary);
+    padding: 4rem 2rem;
+    color: var(--text-muted);
 }
 
 .empty-state i {
     font-size: 3rem;
     margin-bottom: 1rem;
-    opacity: 0.5;
+    opacity: 0.3;
 }
 
-.empty-state p {
-    font-size: 1rem;
-}
-
-/* ===================================
-   Loading Overlay
-   =================================== */
-
+/* Loading Setup */
 .loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -699,75 +313,48 @@ body {
 
 .loading-content {
     text-align: center;
-    color: white;
+    color: var(--dark);
 }
 
 .loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
+    margin: 0 auto 1.5rem;
 }
 
 @keyframes spin {
-    to {
+    100% {
         transform: rotate(360deg);
     }
 }
 
-.loading-content p {
-    font-size: 1.125rem;
-    font-weight: 500;
+/* Shared Component Fixes */
+.card-header {
+    padding: 0 0 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
 }
 
-/* ===================================
-   Responsive Design
-   =================================== */
-
-@media (max-width: 1200px) {
-    .metrics-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .overview-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .analysis-grid {
-        grid-template-columns: 1fr;
-    }
+.card-content {
+    padding: 1.5rem 0 0 0;
 }
 
-@media (max-width: 768px) {
-    .dashboard-wrapper {
-        padding: 1rem;
-    }
+.analysis-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
 
-    .page-header {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-
-    .metrics-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .network-details {
-        grid-template-columns: 1fr;
-    }
-
-    .action-bar {
-        flex-direction: column;
-    }
-
-    .nav-container {
-        flex-direction: column;
-        height: auto;
-        padding: 1rem;
-        gap: 1rem;
-    }
+.action-bar {
+    display: flex;
+    gap: 1rem;
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
